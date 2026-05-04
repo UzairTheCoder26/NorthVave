@@ -11,17 +11,32 @@ const normalizeUrl = (url: string) => {
   return `https://${trimmed}`;
 };
 
-const screenshot = (url: string) =>
+const microlinkScreenshot = (url: string) =>
   `https://api.microlink.io/?url=${encodeURIComponent(
     normalizeUrl(url)
   )}&screenshot=true&meta=false&embed=screenshot.url&viewport.width=1280&viewport.height=800`;
 
 export const PortfolioCard = ({ project, onPreview, index }: Props) => {
+  const stored = project.thumbnail_url?.trim() ?? "";
+  const hasBundledThumb = stored.startsWith("/");
+  const [useMicrolink, setUseMicrolink] = useState(!stored);
   const [loaded, setLoaded] = useState(false);
   const [errored, setErrored] = useState(false);
-  // Vary heights for masonry feel
-  const heights = ["h-[220px]", "h-[280px]", "h-[320px]", "h-[260px]"];
-  const heightCls = heights[index % heights.length];
+
+  const imgSrc = useMicrolink || !stored ? microlinkScreenshot(project.url) : stored;
+  const waitingOnRemote = useMicrolink || !stored;
+  const showBrandedFallback = waitingOnRemote && (!loaded || errored);
+  const showQuickShimmer = hasBundledThumb && !useMicrolink && !loaded && !errored;
+
+  const onImgError = () => {
+    if (stored && !useMicrolink) {
+      setUseMicrolink(true);
+      setLoaded(false);
+      setErrored(false);
+      return;
+    }
+    setErrored(true);
+  };
 
   return (
     <motion.article
@@ -33,10 +48,9 @@ export const PortfolioCard = ({ project, onPreview, index }: Props) => {
       className="group relative overflow-hidden rounded-2xl border border-border bg-card transition-all duration-500 hover:border-primary/50 hover:shadow-[0_20px_60px_-10px_hsl(var(--primary)/0.35)]"
     >
       {/* Screenshot */}
-      <div className={`relative ${heightCls} overflow-hidden bg-secondary-bg`}>
-        {/* Logo fallback — shown while loading or if screenshot fails */}
-        {(!loaded || errored) && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-gradient-to-br from-secondary-bg via-card to-background">
+      <div className="relative aspect-[4/3] w-full overflow-hidden bg-secondary-bg">
+        {showBrandedFallback && (
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-gradient-to-br from-secondary-bg via-card to-background z-[1]">
             <div className="relative flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-primary shadow-[0_0_40px_hsl(var(--primary)/0.4)]">
               <span className="font-display text-2xl font-bold text-primary-foreground tracking-tight">NV</span>
               <span className="absolute inset-0 rounded-2xl border border-primary/30 animate-pulse" />
@@ -49,14 +63,20 @@ export const PortfolioCard = ({ project, onPreview, index }: Props) => {
             </div>
           </div>
         )}
+        {showQuickShimmer && (
+          <div className="absolute inset-0 z-[1] animate-pulse bg-gradient-to-br from-muted/50 via-secondary-bg/80 to-muted/30" />
+        )}
         {!errored && (
           <img
-            src={screenshot(project.url)}
+            key={imgSrc}
+            src={imgSrc}
             alt={`${project.name} preview`}
-            loading="lazy"
+            loading={index < 8 ? "eager" : "lazy"}
+            decoding="async"
+            fetchPriority={index < 4 ? "high" : "auto"}
             onLoad={() => setLoaded(true)}
-            onError={() => setErrored(true)}
-            className={`h-full w-full object-cover object-top transition-all duration-700 group-hover:scale-105 ${
+            onError={onImgError}
+            className={`relative z-0 h-full w-full object-cover object-center transition-all duration-500 group-hover:scale-105 ${
               loaded ? "opacity-100" : "opacity-0"
             }`}
           />

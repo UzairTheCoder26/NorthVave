@@ -1,5 +1,6 @@
 import { motion, useInView, useMotionValue, useTransform, animate } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
+import { useSiteContent } from "@/hooks/useSiteContent";
 
 const stats = [
   { value: 13, suffix: "+", label: "Projects Delivered" },
@@ -25,6 +26,7 @@ const Counter = ({ to, suffix }: { to: number; suffix: string }) => {
 };
 
 export const Stats = () => {
+  const { t } = useSiteContent();
   return (
     <section className="relative border-y border-border bg-background py-20">
       <div className="absolute inset-0 bg-gradient-glow opacity-30" />
@@ -39,10 +41,13 @@ export const Stats = () => {
             className="text-center"
           >
             <div className="font-display text-5xl font-bold tracking-tight text-gradient sm:text-6xl">
-              <Counter to={s.value} suffix={s.suffix} />
+              <Counter
+                to={Number(t(`stats.item.${i}.value`, String(s.value))) || s.value}
+                suffix={t(`stats.item.${i}.suffix`, s.suffix)}
+              />
             </div>
             <div className="mt-2 text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
-              {s.label}
+              {t(`stats.item.${i}.label`, s.label)}
             </div>
           </motion.div>
         ))}

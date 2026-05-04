@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { Zap, Bot, Target } from "lucide-react";
 import { useRef, type MouseEvent } from "react";
+import { useSiteContent } from "@/hooks/useSiteContent";
 
 const services = [
   { icon: Zap, title: "Web Design & Development", desc: "Premium websites that convert. From landing pages to full e-commerce experiences engineered for speed and storytelling.", color: "from-primary/30 to-cyan/10" },
@@ -32,6 +33,7 @@ const TiltCard = ({ children }: { children: React.ReactNode }) => {
 };
 
 export const Services = () => {
+  const { t } = useSiteContent();
   return (
     <section id="services" className="relative scroll-mt-24 bg-secondary-bg py-28">
       <div className="absolute inset-0 bg-grid opacity-[0.04]" />
@@ -43,9 +45,12 @@ export const Services = () => {
           transition={{ duration: 0.6 }}
           className="mb-16 max-w-2xl"
         >
-          <span className="text-xs font-medium uppercase tracking-[0.25em] text-primary">// Services</span>
+          <span className="text-xs font-medium uppercase tracking-[0.25em] text-primary">
+            {t("services.eyebrow", "// Services")}
+          </span>
           <h2 className="mt-3 font-display text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl">
-            Built end-to-end. <span className="text-gradient">In-house.</span>
+            {t("services.title_prefix", "Built end-to-end.")}{" "}
+            <span className="text-gradient">{t("services.title_accent", "In-house.")}</span>
           </h2>
         </motion.div>
 
@@ -66,10 +71,14 @@ export const Services = () => {
                     <div className="mb-6 inline-flex h-12 w-12 items-center justify-center rounded-xl border border-primary/30 bg-primary/10 text-primary">
                       <s.icon className="h-5 w-5" />
                     </div>
-                    <h3 className="font-display text-2xl font-semibold tracking-tight text-foreground">{s.title}</h3>
-                    <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{s.desc}</p>
+                    <h3 className="font-display text-2xl font-semibold tracking-tight text-foreground">
+                      {t(`services.item.${i}.title`, s.title)}
+                    </h3>
+                    <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
+                      {t(`services.item.${i}.desc`, s.desc)}
+                    </p>
                     <div className="mt-8 flex items-center gap-2 text-xs font-medium text-primary opacity-70 transition-opacity group-hover:opacity-100">
-                      <span>Learn more</span>
+                      <span>{t("services.learn_more", "Learn more")}</span>
                       <span className="h-px w-8 bg-primary transition-all group-hover:w-12" />
                     </div>
                   </div>

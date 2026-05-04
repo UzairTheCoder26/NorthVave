@@ -4,6 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { refreshProjects, useProjects, type DbProject } from "@/hooks/useProjects";
 import { refreshSiteContent, useSiteContent } from "@/hooks/useSiteContent";
+import { PROJECT_CATEGORY_PRESETS } from "@/data/projects";
 import { toast } from "sonner";
 import { Loader2, LogOut, Plus, Trash2, Save, ExternalLink, ArrowLeft, Mail, Check } from "lucide-react";
 
@@ -207,6 +208,7 @@ const ProjectsTab = () => {
       category: "SaaS",
       description: "",
       tags: [],
+      thumbnail_url: null,
       display_order: maxOrder + 1,
     });
     setCreating(false);
@@ -239,7 +241,13 @@ const ProjectsTab = () => {
   );
 };
 
-const CATEGORIES = ["Healthcare", "E-Commerce", "SaaS", "Real Estate", "Fashion", "Community", "Coaching"];
+const categorySelectOptions = (current: string) => {
+  const set = new Set<string>([...PROJECT_CATEGORY_PRESETS, current]);
+  const presets = PROJECT_CATEGORY_PRESETS.filter((c) => set.has(c));
+  const extras = [...set].filter((c) => !PROJECT_CATEGORY_PRESETS.includes(c as (typeof PROJECT_CATEGORY_PRESETS)[number]));
+  extras.sort();
+  return [...presets, ...extras];
+};
 
 const ProjectRow = ({ project }: { project: DbProject }) => {
   const [form, setForm] = useState({
@@ -248,6 +256,7 @@ const ProjectRow = ({ project }: { project: DbProject }) => {
     category: project.category,
     description: project.description,
     tags: project.tags.join(", "),
+    thumbnail_url: project.thumbnail_url ?? "",
     display_order: project.display_order,
   });
   const [saving, setSaving] = useState(false);
@@ -258,6 +267,7 @@ const ProjectRow = ({ project }: { project: DbProject }) => {
     form.category !== project.category ||
     form.description !== project.description ||
     form.tags !== project.tags.join(", ") ||
+    form.thumbnail_url !== (project.thumbnail_url ?? "") ||
     form.display_order !== project.display_order;
 
   const save = async () => {
@@ -270,6 +280,7 @@ const ProjectRow = ({ project }: { project: DbProject }) => {
         category: form.category,
         description: form.description,
         tags: form.tags.split(",").map((t) => t.trim()).filter(Boolean),
+        thumbnail_url: form.thumbnail_url.trim() || null,
         display_order: Number(form.display_order) || 0,
       })
       .eq("id", project.id);
@@ -294,6 +305,12 @@ const ProjectRow = ({ project }: { project: DbProject }) => {
       <div className="grid gap-3 sm:grid-cols-2">
         <Input label="Name" value={form.name} onChange={(v) => setForm({ ...form, name: v })} />
         <Input label="URL" value={form.url} onChange={(v) => setForm({ ...form, url: v })} />
+        <Input
+          label="Thumbnail path"
+          value={form.thumbnail_url}
+          onChange={(v) => setForm({ ...form, thumbnail_url: v })}
+          placeholder="/portfolio-thumbnails/name.webp"
+        />
         <div>
           <label className="text-xs uppercase tracking-wider text-muted-foreground">Category</label>
           <select
@@ -301,7 +318,11 @@ const ProjectRow = ({ project }: { project: DbProject }) => {
             onChange={(e) => setForm({ ...form, category: e.target.value })}
             className="mt-1.5 w-full rounded-lg border border-border bg-background/60 px-3 py-2 text-sm focus:border-primary focus:outline-none"
           >
-            {CATEGORIES.map((c) => <option key={c}>{c}</option>)}
+            {categorySelectOptions(form.category).map((c) => (
+              <option key={c} value={c}>
+                {c}
+              </option>
+            ))}
           </select>
         </div>
         <Input
@@ -356,6 +377,7 @@ const ContentTab = () => {
   const { content } = useSiteContent();
   const entries = Object.entries(content).sort(([a], [b]) => a.localeCompare(b));
   const [newKey, setNewKey] = useState("");
+  const [query, setQuery] = useState("");
 
   const addKey = async () => {
     const key = newKey.trim();
@@ -367,6 +389,37 @@ const ContentTab = () => {
     toast.success("Added");
   };
 
+  const seedDefaults = async () => {
+    const rows = [
+      // Contact + footer links
+      { key: "contact.instagram_url", value: "https://instagram.com/northvave" },
+      { key: "contact.handle", value: "@northvave" },
+      { key: "contact.email", value: "hafizuxair26@gmail.com" },
+      { key: "footer.instagram_url", value: "https://instagram.com/northvave" },
+
+      // Privacy
+      { key: "privacy.title", value: "Privacy Policy" },
+      { key: "privacy.updated_at_value", value: "May 4, 2026" },
+      { key: "privacy.body", value: "Write your Privacy Policy here.\n\nTip: use blank lines to create paragraphs." },
+      { key: "privacy.meta_title", value: "Privacy Policy — NorthVave" },
+      { key: "privacy.meta_description", value: "Read NorthVave's Privacy Policy." },
+
+      // Terms
+      { key: "terms.title", value: "Terms of Service" },
+      { key: "terms.updated_at_value", value: "May 4, 2026" },
+      { key: "terms.body", value: "Write your Terms of Service here.\n\nTip: use blank lines to create paragraphs." },
+      { key: "terms.meta_title", value: "Terms of Service — NorthVave" },
+      { key: "terms.meta_description", value: "Read NorthVave's Terms of Service." },
+    ];
+
+    const { error } = await supabase.from("site_content").upsert(rows, { onConflict: "key" });
+    if (error) return toast.error(error.message);
+    await refreshSiteContent();
+    toast.success("Seeded defaults");
+  };
+
+  const filtered = entries.filter(([k]) => k.toLowerCase().includes(query.trim().toLowerCase()));
+
   return (
     <div>
       <div className="mb-6">
@@ -374,6 +427,20 @@ const ContentTab = () => {
         <p className="text-sm text-muted-foreground">
           Edit any text shown on the homepage. Changes go live immediately.
         </p>
+      </div>
+      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <input
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="Search keys…"
+          className="w-full rounded-lg border border-border bg-background/60 px-3 py-2 text-sm focus:border-primary focus:outline-none sm:max-w-sm"
+        />
+        <button
+          onClick={seedDefaults}
+          className="inline-flex items-center justify-center gap-1.5 rounded-full border border-border bg-card/60 px-4 py-2 text-sm font-semibold hover:border-primary/60"
+        >
+          Seed defaults (Privacy/Terms + links)
+        </button>
       </div>
       <div className="mb-6 flex gap-2 rounded-xl border border-border bg-card/60 p-3">
         <input
@@ -390,7 +457,7 @@ const ContentTab = () => {
         </button>
       </div>
       <div className="space-y-3">
-        {entries.map(([key, value]) => (
+        {filtered.map(([key, value]) => (
           <ContentRow key={key} contentKey={key} initialValue={value} />
         ))}
       </div>
@@ -467,18 +534,21 @@ const Input = ({
   onChange,
   type = "text",
   className = "",
+  placeholder,
 }: {
   label: string;
   value: string;
   onChange: (v: string) => void;
   type?: string;
   className?: string;
+  placeholder?: string;
 }) => (
   <div className={className}>
     <label className="text-xs uppercase tracking-wider text-muted-foreground">{label}</label>
     <input
       type={type}
       value={value}
+      placeholder={placeholder}
       onChange={(e) => onChange(e.target.value)}
       className="mt-1.5 w-full rounded-lg border border-border bg-background/60 px-3 py-2 text-sm focus:border-primary focus:outline-none"
     />

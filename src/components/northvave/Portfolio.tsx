@@ -1,6 +1,6 @@
 import { motion, AnimatePresence, LayoutGroup } from "framer-motion";
 import { useMemo, useState } from "react";
-import { categories, type Project } from "@/data/projects";
+import { PROJECT_CATEGORY_PRESETS, type Project } from "@/data/projects";
 import { PortfolioCard } from "./PortfolioCard";
 import { PreviewModal } from "./PreviewModal";
 import { useProjects } from "@/hooks/useProjects";
@@ -11,6 +11,16 @@ export const Portfolio = () => {
   const [preview, setPreview] = useState<Project | null>(null);
   const { projects } = useProjects();
   const { t } = useSiteContent();
+
+  const categories = useMemo(() => {
+    const fromDb = new Set(projects.map((p) => p.category));
+    const presets = PROJECT_CATEGORY_PRESETS.filter((c) => fromDb.has(c));
+    const extras = [...fromDb].filter(
+      (c) => !PROJECT_CATEGORY_PRESETS.includes(c as (typeof PROJECT_CATEGORY_PRESETS)[number])
+    );
+    extras.sort();
+    return ["All", ...presets, ...extras];
+  }, [projects]);
 
   const filtered = useMemo(
     () => (filter === "All" ? projects : projects.filter((p) => p.category === filter)),
@@ -78,7 +88,7 @@ export const Portfolio = () => {
           >
             <AnimatePresence mode="popLayout">
               {filtered.map((p, i) => (
-                <PortfolioCard key={p.url} project={p} onPreview={setPreview} index={i} />
+                <PortfolioCard key={p.id} project={p} onPreview={setPreview} index={i} />
               ))}
             </AnimatePresence>
           </motion.div>

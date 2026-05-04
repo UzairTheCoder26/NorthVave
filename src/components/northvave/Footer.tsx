@@ -1,4 +1,4 @@
-import { Github, Twitter, Linkedin, Instagram } from "lucide-react";
+import { Instagram } from "lucide-react";
 import { useSiteContent } from "@/hooks/useSiteContent";
 import { Link } from "react-router-dom";
 
@@ -20,22 +20,23 @@ export const Footer = () => {
             </p>
           </div>
           <div className="flex items-center gap-3">
-            {[Twitter, Github, Linkedin, Instagram].map((Icon, i) => (
-              <a
-                key={i}
-                href="#"
-                className="flex h-10 w-10 items-center justify-center rounded-full border border-border text-muted-foreground transition-all hover:border-primary/60 hover:text-primary hover:shadow-[0_0_18px_hsl(var(--primary)/0.4)]"
-              >
-                <Icon className="h-4 w-4" />
-              </a>
-            ))}
+            <a
+              href={t("footer.instagram_url", "https://instagram.com/northvave")}
+              target="_blank"
+              rel="noreferrer"
+              className="flex h-10 w-10 items-center justify-center rounded-full border border-border text-muted-foreground transition-all hover:border-primary/60 hover:text-primary hover:shadow-[0_0_18px_hsl(var(--primary)/0.4)]"
+              aria-label="Instagram"
+              title="Instagram"
+            >
+              <Instagram className="h-4 w-4" />
+            </a>
           </div>
         </div>
         <div className="mt-10 flex flex-col items-start justify-between gap-3 border-t border-border pt-6 text-xs text-muted-foreground md:flex-row md:items-center">
           <span>© {new Date().getFullYear()} NorthVave Studio. All rights reserved.</span>
           <div className="flex gap-6">
-            <a href="#" className="transition-colors hover:text-foreground">Privacy</a>
-            <a href="#" className="transition-colors hover:text-foreground">Terms</a>
+            <Link to="/privacy" className="transition-colors hover:text-foreground">Privacy</Link>
+            <Link to="/terms" className="transition-colors hover:text-foreground">Terms</Link>
             <Link to="/admin" className="transition-colors hover:text-foreground opacity-50">Admin</Link>
           </div>
         </div>

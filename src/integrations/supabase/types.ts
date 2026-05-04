@@ -53,6 +53,7 @@ export type Database = {
           id: string
           name: string
           tags: string[]
+          thumbnail_url: string | null
           updated_at: string
           url: string
         }
@@ -64,6 +65,7 @@ export type Database = {
           id?: string
           name: string
           tags?: string[]
+          thumbnail_url?: string | null
           updated_at?: string
           url: string
         }
@@ -75,6 +77,7 @@ export type Database = {
           id?: string
           name?: string
           tags?: string[]
+          thumbnail_url?: string | null
           updated_at?: string
           url?: string
         }

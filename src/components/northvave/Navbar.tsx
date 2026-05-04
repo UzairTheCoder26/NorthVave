@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X } from "lucide-react";
+import { useSiteContent } from "@/hooks/useSiteContent";
 
 const links = [
   { label: "Work", href: "#work" },
@@ -10,6 +11,7 @@ const links = [
 ];
 
 export const Navbar = () => {
+  const { t } = useSiteContent();
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
 
@@ -40,14 +42,14 @@ export const Navbar = () => {
           <div className="hidden items-center gap-8 md:flex">
             {links.map((l) => (
               <a key={l.href} href={l.href} className="text-sm text-muted-foreground transition-colors hover:text-foreground">
-                {l.label}
+                {t(`navbar.link.${l.href.replace("#", "")}`, l.label)}
               </a>
             ))}
             <a
               href="#contact"
               className="shimmer rounded-full bg-primary px-5 py-2 text-sm font-semibold text-primary-foreground transition-all hover:bg-primary-glow hover:shadow-[0_0_24px_hsl(var(--primary)/0.6)]"
             >
-              Start Project
+              {t("navbar.cta", "Start Project")}
             </a>
           </div>
           <button
@@ -87,7 +89,7 @@ export const Navbar = () => {
                   transition={{ delay: 0.05 * i }}
                   className="font-display text-3xl font-semibold text-foreground"
                 >
-                  {l.label}
+                  {t(`navbar.link.${l.href.replace("#", "")}`, l.label)}
                 </motion.a>
               ))}
               <a
@@ -95,7 +97,7 @@ export const Navbar = () => {
                 onClick={() => setOpen(false)}
                 className="mt-4 rounded-full bg-primary px-8 py-3 font-semibold text-primary-foreground glow-blue"
               >
-                Start Project
+                {t("navbar.cta", "Start Project")}
               </a>
             </div>
           </motion.div>

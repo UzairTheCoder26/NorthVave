@@ -1,5 +1,6 @@
 import { motion, useScroll, useTransform } from "framer-motion";
 import { useRef } from "react";
+import { useSiteContent } from "@/hooks/useSiteContent";
 
 const steps = [
   { n: "01", title: "Discovery", desc: "We dig deep into your business, users and goals before a single pixel moves." },
@@ -9,6 +10,7 @@ const steps = [
 ];
 
 export const Process = () => {
+  const { t } = useSiteContent();
   const ref = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start 80%", "end 30%"] });
   const dash = useTransform(scrollYProgress, [0, 1], [1, 0]);
@@ -23,9 +25,12 @@ export const Process = () => {
           transition={{ duration: 0.6 }}
           className="mb-16 max-w-2xl"
         >
-          <span className="text-xs font-medium uppercase tracking-[0.25em] text-primary">// Process</span>
+          <span className="text-xs font-medium uppercase tracking-[0.25em] text-primary">
+            {t("process.eyebrow", "// Process")}
+          </span>
           <h2 className="mt-3 font-display text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl">
-            From idea to <span className="text-gradient">launch.</span>
+            {t("process.title_prefix", "From idea to")}{" "}
+            <span className="text-gradient">{t("process.title_accent", "launch.")}</span>
           </h2>
         </motion.div>
 
@@ -45,7 +50,19 @@ export const Process = () => {
             {steps.map((s, i) => {
               const start = i / steps.length;
               const end = (i + 0.5) / steps.length;
-              return <Step key={s.n} step={s} start={start} end={end} progress={scrollYProgress} />;
+              return (
+                <Step
+                  key={s.n}
+                  step={{
+                    ...s,
+                    title: t(`process.step.${i}.title`, s.title),
+                    desc: t(`process.step.${i}.desc`, s.desc),
+                  }}
+                  start={start}
+                  end={end}
+                  progress={scrollYProgress}
+                />
+              );
             })}
           </div>
         </div>

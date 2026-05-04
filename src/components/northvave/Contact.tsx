@@ -128,11 +128,19 @@ export const Contact = () => {
         </motion.form>
 
         <div className="mt-10 flex flex-wrap items-center justify-center gap-6 text-sm text-muted-foreground">
-          <a href="#" className="inline-flex items-center gap-2 transition-colors hover:text-foreground">
+          <a
+            href={t("contact.instagram_url", "https://instagram.com/northvave")}
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex items-center gap-2 transition-colors hover:text-foreground"
+          >
             <AtSign className="h-4 w-4 text-primary" /> {t("contact.handle", "@northvave")}
           </a>
-          <a href={`mailto:${t("contact.email", "hello@northvave.studio")}`} className="inline-flex items-center gap-2 transition-colors hover:text-foreground">
-            <Mail className="h-4 w-4 text-primary" /> {t("contact.email", "hello@northvave.studio")}
+          <a
+            href={`mailto:${t("contact.email", "hafizuxair26@gmail.com")}`}
+            className="inline-flex items-center gap-2 transition-colors hover:text-foreground"
+          >
+            <Mail className="h-4 w-4 text-primary" /> {t("contact.email", "hafizuxair26@gmail.com")}
           </a>
         </div>
       </div>
