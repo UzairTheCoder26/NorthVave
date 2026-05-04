@@ -2,8 +2,24 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
 
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
-const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+const SUPABASE_URL: string | undefined = import.meta.env.VITE_SUPABASE_URL;
+// Allow both env var names (some setups use ANON_KEY)
+const SUPABASE_PUBLISHABLE_KEY: string | undefined =
+  import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY ?? import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY) {
+  throw new Error(
+    [
+      "Supabase env vars are missing.",
+      "",
+      "Create a .env file (copy from .env.example) and set:",
+      "- VITE_SUPABASE_URL",
+      "- VITE_SUPABASE_PUBLISHABLE_KEY (anon/public key) or VITE_SUPABASE_ANON_KEY",
+      "",
+      "Then restart the dev server.",
+    ].join("\n")
+  );
+}
 
 // Import the supabase client like this:
 // import { supabase } from "@/integrations/supabase/client";
