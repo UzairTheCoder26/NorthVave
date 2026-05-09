@@ -85,14 +85,16 @@ export const PortfolioCard = ({ project, onPreview, index }: Props) => {
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent opacity-60 transition-opacity duration-500 group-hover:opacity-90" />
         {/* Hover button */}
         <div className="absolute inset-0 flex items-end justify-center pb-6 opacity-0 transition-all duration-500 group-hover:opacity-100">
-          <button
-            onClick={() => window.open(normalizeUrl(project.url), '_blank')}
+          <a
+            href={normalizeUrl(project.url)}
+            target="_blank"
+            rel="noopener noreferrer"
             className="flex translate-y-3 items-center gap-2 rounded-full border border-primary/40 bg-primary/90 px-5 py-2.5 text-xs font-semibold text-primary-foreground backdrop-blur-md transition-all duration-500 group-hover:translate-y-0 hover:bg-primary"
           >
             <Eye className="h-3.5 w-3.5" />
             View Live Site
             <ArrowUpRight className="h-3.5 w-3.5" />
-          </button>
+          </a>
         </div>
         {/* Category chip */}
         <div className="absolute left-4 top-4">
